@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutemet cetveli — ek gösterge</title>
+<style>
+  :root {
+    --ink: #1b2420;
+    --muted: #5c675f;
+    --line: #d9d0c0;
+    --paper: #f3efe4;
+    --card: #fffdf8;
+    --green: #1f6a4a;
+    --green-d: #143d2c;
+    --clay: #9a4030;
+    --gold: #a6843d;
+    --chip: #e7f2eb;
+    --warn: #fff4e5;
+    --shadow: 0 10px 30px rgba(40, 32, 18, .06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Source Sans 3", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 400px at 10% -10%, #efe4c8 0%, transparent 50%),
+      var(--paper);
+    line-height: 1.45;
+  }
+  header {
+    padding: 28px 7vw 10px;
+  }
+  .kicker {
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    font-size: clamp(32px, 4vw, 52px);
+    margin: 6px 0 8px;
+    letter-spacing: -.03em;
+    color: var(--green-d);
+  }
+  header p { max-width: 760px; color: var(--muted); margin: 0; }
+  main { padding: 12px 7vw 64px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+  button, select, input {
+    font: inherit;
+    color: inherit;
+  }
+  .chip, .btn {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .chip.on, .btn.primary {
+    background: var(--green-d);
+    color: #f6f3ea;
+    border-color: var(--green-d);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    header, main { padding-left: 16px; padding-right: 16px; }
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 16px 16px 18px;
+  }
+  .card h2 {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    margin: 0 0 12px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  select, input[type="number"], input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 9px 10px;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; color: var(--ink); font-size: 14px; }
+  .check input { margin-top: 3px; }
+  .stamp {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  .ek {
+    font-family: Georgia, serif;
+    font-size: 56px;
+    line-height: .9;
+    color: var(--clay);
+    letter-spacing: -.04em;
+  }
+  .ek small { display: block; font-family: "Segoe UI", sans-serif; font-size: 13px; color: var(--muted); letter-spacing: 0; margin-bottom: 4px; }
+  .why { background: var(--chip); border-radius: 12px; padding: 12px 14px; font-size: 14.5px; }
+  .why strong { color: var(--green-d); }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .pill {
+    background: #f6f1e6;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 4px; }
+  td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.off td { color: #9aa197; }
+  .fis td.deger { font-weight: 700; color: var(--green-d); white-space: nowrap; }
+  .fis tr.yok td { color: #8b918a; }
+  .banner {
+    margin-top: 14px;
+    background: var(--green-d);
+    color: #f7f4ec;
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .banner h2 { color: #f7f4ec; margin: 0 0 4px; }
+  .note, .warn {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .warn {
+    background: var(--warn);
+    color: #6a4a1a;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  .scale { width: 100%; font-size: 13px; margin-top: 8px; }
+  .scale td, .scale th { padding: 6px; }
+  .here { background: #f8e4d8; font-weight: 700; }
+  details { margin-top: 18px; }
+  details > summary {
+    cursor: pointer;
+    font-family: Georgia, serif;
+    font-size: 26px;
+    color: var(--green-d);
+  }
+  .search {
+    margin: 12px 0;
+  }
+  .cetvel-block { margin: 14px 0 22px; }
+  .cetvel-block h3 { margin: 0 0 6px; font-size: 16px; }
+  .mini { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  footer { padding: 0 7vw 40px; color: var(--muted); font-size: 12.5px; }
+  @media print {
+    .presets, form, details, footer, .btn { display: none !important; }
+    body { background: white; }
+    header, main { padding: 0; }
+    .layout { display: block; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">Millî Eğitim · mutemet cetveli</div>
+  <h1>Cetvelden bu satır seçilir.</h1>
+  <p>Unvanı, öğrenimi ve dereceyi gir. Alttaki fiş, mutemedin ek gösterge, yan ödeme ve tazminat cetvelinden yazacağı kalemi gösterir. Maaş tutarı yazılmaz; o tutar katsayıya göre değişir.</p>
+</header>
+<main>
+  <div class="presets" id="presets"></div>
+  <div class="layout">
+    <form class="card" id="form">
+      <h2>Sorgu</h2>
+      <label for="unvan">Unvan</label>
+      <select id="unvan"></select>
+      <div id="egitimWrap">
+        <label for="egitim">Öğrenim</label>
+        <select id="egitim"></select>
+      </div>
+      <div id="yerWrap">
+        <label for="yer">Görev yeri</label>
+        <select id="yer">
+          <option value="okul">Okul — yataklı tedavi kurumu değil</option>
+          <option value="yatakli">Yataklı tedavi kurumu</option>
+        </select>
+      </div>
+      <div id="ilWrap" hidden>
+        <label for="il">İl</label>
+        <select id="il">
+          <option value="diger">Ankara, İstanbul ve İzmir dışı</option>
+          <option value="uc">Ankara, İstanbul veya İzmir</option>
+        </select>
+      </div>
+      <div id="teftisWrap" hidden>
+        <label for="teftis">Teftiş yetkisinin düzeyi</label>
+        <select id="teftis">
+          <option value="il">İl düzeyi</option>
+          <option value="turkiye">Türkiye geneli</option>
+        </select>
+      </div>
+      <div id="bolgeWrap">
+        <label for="bolge">Kalkınmada öncelikli yöre — ek tazminat</label>
+        <select id="bolge">
+          <option value="0">Yok</option>
+          <option value="1">1. bölge</option>
+          <option value="2">2. bölge</option>
+          <option value="3">3. bölge</option>
+          <option value="4">4. bölge</option>
+          <option value="5">5. bölge</option>
+          <option value="6">6. bölge</option>
+          <option value="7">7. bölge</option>
+        </select>
+      </div>
+      <div class="grid2">
+        <div>
+          <label for="derece">Derece</label>
+          <input id="derece" type="number" min="1" max="15" value="3">
+        </div>
+        <div>
+          <label for="kademe">Kademe</label>
+          <input id="kademe" type="number" min="1" max="9" value="2">
+        </div>
+      </div>
+      <div id="hizmetWrap">
+        <label for="hizmet" id="hizmetLabel">Hizmet yılı</label>
+        <input id="hizmet" type="number" min="0" max="50" value="18">
+      </div>
+      <div id="ilaveWrap" hidden>
+        <label for="brans">İlave eğitim öğretim tazminatı — meslek alanı</label>
+        <select id="brans">
+          <option value="yok">Yok</option>
+          <option value="a">A — bilişim, elektrik, makine, metal, motor, tekstil, gemi, uçak</option>
+          <option value="b">B — inşaat, kimya teknolojisi, mobilya, tarım, tesisat, harita</option>
+          <option value="c">C — gıda, sağlık hizmetleri, laboratuvar, ayakkabı</option>
+          <option value="d">D — el sanatları, grafik, güzellik, moda, hasta ve yaşlı</option>
+          <option value="e">E — büro, çocuk gelişimi, muhasebe, okulöncesi uygulama</option>
+        </select>
+      </div>
+      <div id="sureWrap" hidden>
+        <label for="sure">Mesleki öğrenim süresi</label>
+        <select id="sure">
+          <option value="4">En az 4 yıl</option>
+          <option value="2">En az 2 yıl, 4 yıldan kısa</option>
+        </select>
+      </div>
+      <label class="check" id="kokenWrap"><input type="checkbox" id="koken"> Öğretmen kadrosundan geldi</label>
+      <label class="check" id="belleticiWrap"><input type="checkbox" id="belletici"> Belleticilik görevi var</label>
+      <button class="btn primary" type="button" id="hesapla" style="margin-top:14px">Mutemet fişini dök</button>
+      <p class="note">3/2, üçüncü derecenin ikinci kademesidir. Ek gösterge dereceye göre seçilir. Kademe yalnız aylık göstergeyi değiştirir.</p>
+    </form>
+    <section>
+      <article class="card" id="sonuc"></article>
+    </section>
+  </div>
+
+  <details>
+    <summary>Cetvelin tamamı</summary>
+    <input class="search" id="ara" type="text" placeholder="Unvan veya sınıf ara: hemşire, öğretmen, şube müdürü, hizmetli">
+    <div id="cetvel"></div>
+  </details>
+</main>
+<footer>
+  Kaynaklar: 5 Temmuz 2022 tarihli 31887 sayılı Resmî Gazete’de yayımlanan 7417 sayılı Kanun ile değişen 657 sayılı Kanun ekli I ve II sayılı ek gösterge cetvelleri (mevzuat.gov.tr birleşik metin).
+  Zam ve tazminat puanları, ekteki güncel Zam ve Tazminat Kararnamesinden. Kurumsal listede adı geçen unvana yalnız o listenin puanı yazılır.
+  Fişte TL maaş tutarı yoktur. Puan ve oran, mutemedin cetvele yazdığı kalemdir. Katsayı değişince bu puanların lirası değişir; en düşük memur maaşı bu puanların toplamı değildir.
+</footer>
+<script>
+const GOSTERGE = {
+  1: [1320, 1380, 1440, 1500],
+  2: [1155, 1210, 1265, 1320, 1380, 1440],
+  3: [1020, 1065, 1110, 1155, 1210, 1265, 1320, 1380],
+  4: [915, 950, 985, 1020, 1065, 1110, 1155, 1210, 1265],
+  5: [835, 865, 895, 915, 950, 985, 1020, 1065, 1110],
+  6: [760, 785, 810, 835, 865, 895, 915, 950, 985],
+  7: [705, 720, 740, 760, 785, 810, 835, 865, 895],
+  8: [660, 675, 690, 705, 720, 740, 760, 785, 810],
+  9: [620, 630, 645, 660, 675, 690, 705, 720, 740],
+  10: [590, 600, 610, 620, 630, 645, 660, 675, 690],
+  11: [560, 570, 580, 590, 600, 610, 620, 630, 645],
+  12: [545, 550, 555, 560, 570, 580, 590, 600, 610],
+  13: [530, 535, 540, 545, 550, 555, 560, 570, 580],
+  14: [515, 520, 525, 530, 535, 540, 545, 550, 555],
+  15: [500, 505, 510, 515, 520, 525, 530, 535, 540]
+};
+
+const S3600 = { 1: 3600, 2: 3000, 3: 2200, 4: 2100, 5: 1800, 6: 1700, 7: 1500, 8: 1400 };
+const S4200 = { 1: 4200, 2: 3600, 3: 2800, 4: 2200, 5: 1900, 6: 1750, 7: 1550, 8: 1450 };
+const S2800 = { 1: 2800, 2: 2200, 3: 1700, 4: 1400 };
+const S2100 = { 1: 2100, 2: 1700, 3: 1400, 4: 1250 };
+const S_MUDUR = { 1: 3600, 2: 3000, 3: 2200, 4: 2100 };
+
+const CETVEL = [
+  { sinif: "I — Genel İdare Hizmetleri Sınıfı", gruplar: [
+    { id: "gih-a1", kalem: "(a) Diyanet İşleri Başkanı", puan: { 1: 9000 }, kim: "Tek unvan." },
+    { id: "gih-a2", kalem: "(a) Bakan yardımcısı, Cumhurbaşkanlığı Strateji ve Bütçe Başkanı, Cumhurbaşkanlığı İletişim Başkanı", puan: { 1: 8000 }, kim: "1. derece." },
+    { id: "gih-b", kalem: "(b) Müsteşar, Milli Güvenlik Kurulu Genel Sekreteri", puan: { 1: 7800 } },
+    { id: "gih-c", kalem: "(c) Teftiş Kurulu Başkanı, Devlet Personel Başkanı, Gelir İdaresi Başkanı, SGK Başkanı, TÜİK Başkanı, Talim ve Terbiye Kurulu Başkanı ve aynı bentteki başkanlar", puan: { 1: 7600 } },
+    { id: "gih-d", kalem: "(d) Genel müdür, müsteşar yardımcısı, büyükelçi, strateji geliştirme başkanı, bakanlık teftiş/denetim başkanı ve aynı bentteki unvanlar", puan: { 1: 7000 } },
+    { id: "gih-e", kalem: "(e) Başbakan müşaviri, bakanlık yüksek müşaviri, TÜİK ve TOKİ başkan yardımcıları", puan: { 1: 5900 } },
+    { id: "gih-f", kalem: "(f) Talim ve Terbiye Kurulu üyesi, büyükşehir belediye genel sekreteri, vergi dairesi başkanı (Ankara, İstanbul, İzmir) ve aynı bent", puan: { 1: 5400 } },
+    { id: "gih-g", kalem: "(g) Kariyer uzman, müfettiş, kontrolör, iç denetçi, maarif müfettişi, maliye vergi müfettişi", puan: S4200, kim: "Özel yarışma sınavı ve yeterlik sınavıyla girilen meslekler. 1. dereceden 8. dereceye." },
+    { id: "gih-h", kalem: "(h) Gelir uzmanı, mali hizmetler uzmanı, denetmen, defterdarlık uzmanı, il istihdam uzmanı", puan: S3600, kim: "1. dereceden 8. dereceye." },
+    { id: "gih-i-mudur", kalem: "(ı) Şube müdürü, müdür yardımcısı, ilçe müdürü, sayman, daire başkan yardımcısı, il müdür yardımcısı", puan: S_MUDUR, kim: "II sayılı cetveldeki unvanların 1. derece dışındaki kadroları da bu satırdadır. 5. dereceden itibaren bu bentte ek gösterge yoktur." },
+    { id: "gih-i-yuksek", kalem: "(i/1) Sınıfın geri kalanı — yükseköğrenim mezunları (memur, VHKİ, bilgisayar işletmeni, şef)", puan: S2800, kim: "Önlisans ve lisans aynı satırdır. 5. derecede ek gösterge yoktur." },
+    { id: "gih-i-diger", kalem: "(i/2) Sınıfın geri kalanı — lise ve daha aşağı öğrenim", puan: S2100 }
+  ]},
+  { sinif: "II — Teknik Hizmetler Sınıfı", gruplar: [
+    { id: "th-a", kalem: "(a) Mühendis, mimar, peyzaj mimarı, iç mimar, şehir plancısı, bölge plancısı", puan: S4200, kim: "En az 4 yıl. 1–8. derece." },
+    { id: "th-b", kalem: "(b) Jeolog, hidrojeolog, hidrolog, jeomorfolog, jeofizikçi, fizikçi, matematikçi, istatistikçi, kimyager ve bentte sayılanlar", puan: S3600 },
+    { id: "th-c", kalem: "(c) Diğer yükseköğrenim mezunları, yüksek tekniker, tekniker", puan: { 1: 2800, 2: 2200, 3: 2100, 4: 1700 } },
+    { id: "th-d", kalem: "(d) Teknisyen ve yukarıda sayılmayanlar", puan: S2100 }
+  ]},
+  { sinif: "III — Sağlık Hizmetleri Sınıfı", gruplar: [
+    { id: "sh-a", kalem: "(a) Uzman tabip, tabip, diş hekimi, veteriner hekim, eczacı, biyolog ve tıpta uzmanlık belgesi olanlar", puan: S4200, kim: "Hemşire bu bentte değildir." },
+    { id: "sh-b", kalem: "(b) Yükseköğrenim mezunları — hemşire, ebe, sağlık memuru, fizyoterapist, diyetisyen ve diğer sağlık lisansiyer / önlisans", puan: S3600, kim: "4 yıllık hemşirelik de 2 yıllık hemşirelik de bu kalemdedir. Tazminat oranı ise 4 yıl ile daha kısa öğrenimde ayrılır." },
+    { id: "sh-c", kalem: "(c) Lise ve daha aşağı mesleki öğrenim — sağlık meslek lisesi hemşire, ebe, sağlık memuru", puan: S2100 }
+  ]},
+  { sinif: "IV — Eğitim ve Öğretim Hizmetleri Sınıfı", gruplar: [
+    { id: "eoh", kalem: "Öğretmen", puan: S3600, kim: "Uzman öğretmen ve başöğretmen aynı ek gösterge satırındadır. Fark, eğitim-öğretim tazminatının ek oranındadır." }
+  ]},
+  { sinif: "V — Avukatlık Hizmetleri Sınıfı", gruplar: [
+    { id: "av", kalem: "Avukat", puan: S3600 }
+  ]},
+  { sinif: "VI — Din Hizmetleri Sınıfı", gruplar: [
+    { id: "din-a", kalem: "(a) Yükseköğrenim mezunları", puan: S3600 },
+    { id: "din-b", kalem: "(b) Diğerleri", puan: S2100 }
+  ]},
+  { sinif: "VII — Emniyet Hizmetleri Sınıfı", gruplar: [
+    { id: "em-a", kalem: "(a) Emniyet Genel Müdürü", puan: { 1: 7600 } },
+    { id: "em-b", kalem: "(b) Teftiş Kurulu Başkanı, Polis Akademisi Başkanı, Emniyet Genel Müdür yardımcısı, Ankara / İstanbul / İzmir il emniyet müdürü", puan: { 1: 6400 } },
+    { id: "em-c", kalem: "(c) Daire başkanı ve diğer birinci sınıf emniyet müdürleri", puan: { 1: 5400 } },
+    { id: "em-d", kalem: "(d) Emniyet müdürü ve emniyet amiri", puan: { 1: 4800, 2: 4200, 3: 3600, 4: 3000 } },
+    { id: "em-e", kalem: "(e) Başkomiser ile komiser yardımcısı arası", puan: { 1: 4200, 2: 3600, 3: 3000, 4: 2200 } },
+    { id: "em-f1", kalem: "(f/aa) Polis memuru — yükseköğrenim", puan: S3600 },
+    { id: "em-f2", kalem: "(f/bb) Polis memuru — diğerleri", puan: S2100 }
+  ]},
+  { sinif: "VIII — Mülki İdare Amirliği Hizmetleri Sınıfı", gruplar: [
+    { id: "mia-a", kalem: "(a) Vali, müsteşar", puan: { 1: 7800 } },
+    { id: "mia-b", kalem: "(b) Birinci sınıf mülki idare amiri — 1. derecenin 4. kademesi", puan: { 1: 6400 }, kim: "Ek gösterge, 1. derecenin 4. kademesinde uygulanır ve Genel İdare’deki aynı unvanın altına düşemez." },
+    { id: "mia-c", kalem: "(c) Diğer mülki idare amirleri", puan: { 1: 4600, 2: 4200, 3: 3600, 4: 2900, 5: 2800, 6: 2200, 7: 2100, 8: 1900, 9: 1750 }, kim: "1. derecenin 4. kademesi için cetveldeki rakam 5.400’dür. 4. derece satırı birleşik metinde 2.900 görünür; bordroya esas rakamı özlük birimi teyit etmelidir." }
+  ]},
+  { sinif: "IX — Yardımcı Hizmetler Sınıfı", gruplar: [
+    { id: "yh", kalem: "Hizmetli, kaloriferci, aşçı, bekçi ve sınıfın tamamı", puan: { 1: 600, 2: 600, 3: 600, 4: 600 }, kim: "5. dereceden 15. dereceye kadar bu cetvelde ek gösterge yoktur." }
+  ]}
+];
+
+const II_CETVEL = [
+  { puan: 4400, unvanlar: ["Mali Suçları Araştırma Kurulu başkan yardımcısı", "Vergi Denetim Kurulu başkan yardımcısı", "genel müdür yardımcısı", "I. hukuk müşaviri", "daire başkanı (ana ve yardımcı hizmet birimi)", "Yüksek Fen Kurulu üyesi", "Millî Eğitim Bakanlığı Bilgi İşlem Grup Başkanı", "Millî Eğitim Bakanlığı İnşaat ve Emlak Grup Başkanı", "üniversite genel sekreteri", "teftiş kurulu başkanı"] },
+  { puan: 4200, unvanlar: ["bakanlık müşaviri", "bakanlık il müdürü (Ankara, İstanbul, İzmir)", "bakanlık bölge müdürü", "vergi dairesi başkanı", "il müftüsü", "büyükşehir belediye genel sekreter yardımcısı", "Millî Eğitim Bakanlığı grup başkanı"] },
+  { puan: 3600, unvanlar: ["okul müdürü", "hukuk müşaviri", "bakanlık il müdürü", "hastane müdürü", "saymanlık müdürü", "cezaevi müdürü", "fakülte sekreteri", "ilçe müftüsü", "savunma sekreteri", "belediye başkan yardımcısı", "il afet ve acil durum müdürü"] }
+];
+
+const MEB = [
+  { grup: "Öğretmenlik", id: "ogretmen", ad: "Öğretmen", tip: "ogretmen" },
+  { grup: "Öğretmenlik", id: "rehber", ad: "Rehber öğretmen", tip: "ogretmen" },
+  { grup: "Öğretmenlik", id: "uzman", ad: "Uzman öğretmen", tip: "ogretmen", uzman: 1 },
+  { grup: "Öğretmenlik", id: "bas", ad: "Başöğretmen", tip: "ogretmen", uzman: 2 },
+  { grup: "Öğretmenlik", id: "ogretmen-yibo", ad: "Öğretmen — özel eğitim veya YİBO", tip: "ogretmen", yibo: 1 },
+  { grup: "Öğretmenlik", id: "yetkili", ad: "Müdür yetkili öğretmen (kadrosu öğretmen)", tip: "ogretmen", yetkili: 1 },
+  { grup: "Okul yönetimi", id: "mudur", ad: "Okul, halk eğitim veya rehberlik merkezi müdürü", tip: "mudur" },
+  { grup: "Okul yönetimi", id: "mudur-yrd", ad: "Müdür başyardımcısı / müdür yardımcısı", tip: "mudur", yrd: 1 },
+  { grup: "Okul yönetimi", id: "mudur-yibo", ad: "Müdür — özel eğitim veya YİBO", tip: "mudur", yibo: 1 },
+  { grup: "Okul yönetimi", id: "mudur-yrd-yibo", ad: "Müdür yardımcısı — özel eğitim veya YİBO", tip: "mudur", yrd: 1, yibo: 1 },
+  { grup: "Okul yönetimi", id: "atolye", ad: "Bölüm, atölye veya laboratuvar şefi", tip: "atolye" },
+  { grup: "İl ve bakanlık", id: "il-mem", ad: "İl millî eğitim müdürü", tip: "ilmem", il: 1, koken: 1 },
+  { grup: "İl ve bakanlık", id: "il-yrd", ad: "İl millî eğitim müdür yardımcısı", tip: "ilyrd", il: 1, koken: 1, hizmet: 1 },
+  { grup: "İl ve bakanlık", id: "ilce", ad: "İlçe millî eğitim müdürü", tip: "sube", koken: 1, hizmet: 1 },
+  { grup: "İl ve bakanlık", id: "sube", ad: "Şube müdürü — taşra", tip: "sube", koken: 1, hizmet: 1 },
+  { grup: "İl ve bakanlık", id: "sube-merkez", ad: "Şube müdürü — bakanlık merkezi", tip: "sube", merkez: 1, koken: 1, hizmet: 1 },
+  { grup: "İl ve bakanlık", id: "egitim-uzman", ad: "Eğitim uzmanı veya APK uzmanı — merkez", tip: "uzmanlik" },
+  { grup: "İl ve bakanlık", id: "ttk-baskan", ad: "Talim ve Terbiye Kurulu Başkanı", tip: "ttk", rol: "baskan" },
+  { grup: "İl ve bakanlık", id: "ttk-uye", ad: "Talim ve Terbiye Kurulu üyesi", tip: "ttk", rol: "uye" },
+  { grup: "İl ve bakanlık", id: "ttk-uzman", ad: "Talim ve Terbiye Kurulu uzmanı", tip: "uzmanlik", ttk: 1 },
+  { grup: "İl ve bakanlık", id: "mufettis", ad: "Eğitim müfettişi", tip: "mufettis", teftis: 1 },
+  { grup: "İl ve bakanlık", id: "mufettis-yrd", ad: "Eğitim müfettiş yardımcısı", tip: "mufettis", teftis: 1, yrd: 1 },
+  { grup: "Sağlık", id: "hemsire", ad: "Hemşire", tip: "saglik", egitim: "saglik", yer: "saglik", bolge: 1 },
+  { grup: "Sağlık", id: "ebe", ad: "Ebe", tip: "saglik", egitim: "saglik", yer: "saglik", bolge: 1 },
+  { grup: "Sağlık", id: "saglik-memuru", ad: "Sağlık memuru / sağlık teknikeri", tip: "saglik", egitim: "saglik", yer: "saglik", bolge: 1 },
+  { grup: "Teknik", id: "muhendis", ad: "Mühendis / mimar", tip: "muhendis", hizmet: 1, bolge: 1 },
+  { grup: "Teknik", id: "tekniker", ad: "Tekniker / yüksek tekniker", tip: "tekniker", hizmet: 1, bolge: 1 },
+  { grup: "Teknik", id: "teknisyen", ad: "Teknisyen — lise dengi mesleki", tip: "teknisyen", hizmet: 1, bolge: 1 },
+  { grup: "Büro", id: "sef", ad: "Şef", tip: "sef", egitim: "ogrenim" },
+  { grup: "Büro", id: "memur", ad: "Memur / VHKİ", tip: "memur", egitim: "ogrenim" },
+  { grup: "Büro", id: "veri", ad: "Veri hazırlama ve kontrol işletmeni", tip: "veri", egitim: "ogrenim" },
+  { grup: "Büro", id: "bilgisayar", ad: "Bilgisayar işletmeni", tip: "veri", egitim: "ogrenim", bilgi: 1 },
+  { grup: "Büro", id: "avukat", ad: "Avukat", tip: "avukat" },
+  { grup: "Yardımcı hizmetler", id: "hizmetli", ad: "Hizmetli, aşçı, kaloriferci, bahçıvan", tip: "yh" },
+  { grup: "Yardımcı hizmetler", id: "bekci", ad: "Bekçi", tip: "yh", bekci: 1 },
+  { grup: "Yardımcı hizmetler", id: "sofor", ad: "Şoför — yardımcı hizmetler kadrosu", tip: "yh" },
+  { grup: "Yardımcı hizmetler", id: "tek-yrd", ad: "Teknisyen yardımcısı", tip: "yh", tekyrd: 1 }
+];
+
+const EGITIM = {
+  saglik: [
+    ["lisans4", "Mesleki sağlık yükseköğrenimi, en az 4 yıl"],
+    ["onlisans", "Mesleki sağlık yükseköğrenimi, 4 yıldan kısa"],
+    ["lise", "Lise dengi mesleki sağlık öğrenimi"],
+    ["orta", "Ortaokul dengi veya mesleksiz"]
+  ],
+  ogrenim: [
+    ["yuksek", "Yükseköğrenim (önlisans veya lisans)"],
+    ["lise", "Lise ve daha aşağı"]
+  ]
+};
+
+const $ = (id) => document.getElementById(id);
+const sayi = new Intl.NumberFormat("tr-TR");
+
+function findGroup(id) {
+  for (const s of CETVEL) {
+    const g = s.gruplar.find((x) => x.id === id);
+    if (g) return { sinif: s.sinif, ...g };
+  }
+  return null;
+}
+function gostergePuan(derece, kademe) {
+  const row = GOSTERGE[derece];
+  if (!row || kademe < 1 || kademe > row.length) return null;
+  return row[kademe - 1];
+}
+function emekliDilim(ek) {
+  if (!ek) return 55;
+  if (ek >= 8400) return 255;
+  if (ek >= 7800) return 215;
+  if (ek >= 7000) return 195;
+  if (ek >= 5400) return 165;
+  if (ek >= 3600) return 145;
+  if (ek >= 2800) return 85;
+  return 55;
+}
+function puanAl(id, derece) {
+  const g = findGroup(id);
+  return { g, puan: g && g.puan[derece] ? g.puan[derece] : 0 };
+}
+function mudurOht(derece, yrd) {
+  if (yrd && derece === 1) return { oran: 125, yazi: "II sayılı cetvel (A) grup 11 sıra 2. Müdür ve şube müdürünün yardımcıları 1. derecede %125’tir, %135 değildir" };
+  const tablo = { 1: [135, "grup 10 sıra 5"], 2: [100, "grup 12 sıra 1"], 3: [80, "grup 13 sıra 1"], 4: [68, "grup 15 sıra 1"] };
+  if (tablo[derece]) {
+    const yrdNot = yrd ? " Yardımcısı da bu satırdadır." : "";
+    return { oran: tablo[derece][0], yazi: "II sayılı cetvel (A) " + tablo[derece][1] + ", " + derece + ". derece." + yrdNot };
+  }
+  if (derece >= 5 && derece <= 7) return { oran: 60, yazi: "II sayılı cetvel (A) grup 16 sıra 4, 5, 6 ve 7. derece" };
+  return { oran: null, yazi: "Bu derecede müdür / şube müdürü özel hizmet satırı yok" };
+}
+const ILAVE = {
+  a: [15, 10, "III sayılı cetvel A/II-a. Bilişim, elektrik-elektronik, makine, metal, motor, tekstil, gemi, uçak ve aynı bentteki alanlar"],
+  b: [12, 8, "III sayılı cetvel A/II-b. İnşaat, kimya teknolojisi, mobilya, tarım, tesisat, harita ve aynı bentteki alanlar"],
+  c: [10, 7, "III sayılı cetvel A/II-c. Gıda, sağlık hizmetleri, laboratuvar, ayakkabı ve hayvan yetiştiriciliği"],
+  d: [9, 6, "III sayılı cetvel A/II-d. El sanatları, grafik, güzellik, moda, hasta ve yaşlı hizmetleri"],
+  e: [6, 4, "III sayılı cetvel A/II-e. Büro, çocuk gelişimi, muhasebe, okulöncesi uygulama sınıfı ve aynı bentteki alanlar"]
+};
+function eotOran(derece, uzman) {
+  const baz = derece <= 2 ? 100 : derece <= 4 ? 95 : 85;
+  const bazYazi = "III sayılı cetvel A/I-a, fiilen öğretmenlik. " + (derece <= 2 ? "1–2. derece %100" : derece <= 4 ? "3–4. derece %95" : "diğer dereceler %85");
+  if (uzman === 1) {
+    const ek = derece <= 2 ? 60 : 50;
+    return { baz, bazYazi, ek, ekYazi: "A/I-b ayrıca yazılır. 1–2. derece +60, diğer dereceler +50. Taban orana katılmaz" };
+  }
+  if (uzman === 2) {
+    const ek = derece <= 2 ? 120 : 100;
+    return { baz, bazYazi, ek, ekYazi: "A/I-c ayrıca yazılır. 1–2. derece +120, diğer dereceler +100. Taban orana katılmaz" };
+  }
+  return { baz, bazYazi, ek: 0 };
+}
+function kokenEk(baz, derece, koken) {
+  if (!koken) return baz;
+  const og = puanAl("eoh", derece);
+  if (og.puan > baz.puan) {
+    return { g: og.g, puan: og.puan, metin: "Öğretmen kadrosundan geldiği için ek gösterge, öğretmen skalasının (" + sayi.format(og.puan) + ") altına düşmez." };
+  }
+  return baz;
+}
+function ekYonetici(derece, koken) {
+  return kokenEk(puanAl("gih-i-mudur", derece), derece, koken);
+}
+function saglikPaket(p) {
+  const yuksek = p.egitim === "lisans4" || p.egitim === "onlisans";
+  const grupId = yuksek ? "sh-b" : "sh-c";
+  const yatak = p.yer === "yatakli";
+  let yan;
+  if (yuksek) {
+    yan = yatak
+      ? { isg: 600, risk: 500, temin: 600, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/a-1, yataklı tedavi, mesleki sağlık yükseköğrenimi" }
+      : { isg: 550, risk: 500, temin: 500, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/a-2, diğer yerler. Okul bu satırdır" };
+  } else if (p.egitim === "lise") {
+    yan = yatak
+      ? { isg: 550, risk: 500, temin: 200, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/b-1, lise dengi, yataklı tedavi" }
+      : { isg: 500, risk: 500, temin: 200, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/b-2, lise dengi, diğer yerler" };
+  } else {
+    yan = yatak
+      ? { isg: 550, risk: 500, temin: 0, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/c-1, diğer personel, yataklı tedavi" }
+      : { isg: 500, risk: 500, temin: 0, mali: 0, cetvel: "I sayılı cetvel (C) sıra 3/c-2, diğer personel, diğer yerler" };
+  }
+  const d14 = p.derece >= 1 && p.derece <= 4;
+  let oht;
+  if (p.egitim === "lisans4") oht = { oran: d14 ? 97 : 94, ek: [6, 10, 15, 20, 25, 30, 35], yazi: "II sayılı cetvel (F) sıra 6/a-1, öğrenim en az 4 yıl" };
+  else if (p.egitim === "onlisans") oht = { oran: d14 ? 90 : 88, ek: [6, 10, 13, 16, 19, 22, 25], yazi: "II sayılı cetvel (F) sıra 6/a-2, öğrenim 4 yıldan kısa" };
+  else if (p.egitim === "lise") oht = { oran: d14 ? 72 : 70, ek: [5, 10, 12, 14, 16, 18, 20], yazi: "II sayılı cetvel (F) sıra 6/b, lise dengi" };
+  else if (p.derece >= 8 && p.derece <= 14) oht = { oran: 58, ek: [3, 5, 7, 9, 11, 13, 15], yazi: "II sayılı cetvel (F) sıra 6/c, 8–14. dereceler" };
+  else oht = { oran: 60, ek: [3, 5, 7, 9, 11, 13, 15], yazi: "II sayılı cetvel (F) sıra 6/c, 8–14 dışı dereceler" };
+  const ek = puanAl(grupId, p.derece);
+  const metin = yuksek
+    ? "Yükseköğrenim, I sayılı ek gösterge cetveli III/b. Önlisans da lisans da bu puanı alır. Tazminat oranı 4 yılda ayrılır."
+    : "Lise veya daha aşağı öğrenim, III/c. Yükseköğrenim satırındaki puan bu öğrenimde seçilmez.";
+  return { sinif: "Sağlık Hizmetleri Sınıfı", ek, metin, yan, oht, eot: null };
+}
+
+function coz(p) {
+  const m = MEB.find((x) => x.id === p.id);
+  const d = p.derece;
+  if (m.tip === "saglik") return { m, ...saglikPaket(p) };
+  if (m.tip === "ogretmen" || m.tip === "atolye") {
+    const yibo = !!m.yibo;
+    const isg = yibo ? 600 : 500;
+    const yan = {
+      isg, risk: 250, temin: yibo ? 250 : 0, mali: 0,
+      cetvel: m.tip === "atolye"
+        ? "I sayılı cetvel (D) sıra 3, bölüm / atölye / laboratuvar şefi: iş güçlüğü 725, iş riski 250"
+        : yibo
+          ? "I sayılı cetvel (D) sıra 4/c, özel eğitim veya YİBO öğretmeni"
+          : "I sayılı cetvel (D) sıra 5, öğretmen. Uzman ve başöğretmen de bu puanı alır"
+    };
+    if (m.tip === "atolye") { yan.isg = 725; yan.temin = 0; }
+    const ek = puanAl("eoh", d);
+    return {
+      m, sinif: "Eğitim ve Öğretim Hizmetleri Sınıfı", ek,
+      metin: m.yetkili
+        ? "Kadro öğretmen. Mutemet müdür satırını seçmez; ek gösterge, yan ödeme ve tazminat öğretmen satırındandır."
+        : "Ek gösterge, 5 Temmuz 2022 cetvelindeki öğretmen skalasıdır. 1. derece 3.600, 3. derece 2.200.",
+      yan,
+      oht: { oran: null, yazi: "Özel hizmet tazminatı seçilmez. Bu kadronun tazminatı eğitim öğretim tazminatıdır" },
+      eot: eotOran(d, m.uzman || 0)
+    };
+  }
+  if (m.tip === "mudur") {
+    let yan;
+    if (m.yibo && m.yrd) yan = { isg: 900, risk: 250, temin: 250, mali: 0, cetvel: "I sayılı cetvel (D) sıra 4/b" };
+    else if (m.yibo) yan = { isg: 925, risk: 250, temin: 250, mali: 0, cetvel: "I sayılı cetvel (D) sıra 4/a" };
+    else if (m.yrd) yan = { isg: 900, risk: 250, temin: 0, mali: 0, cetvel: "I sayılı cetvel (D) sıra 2/b, müdür yardımcısı" };
+    else yan = { isg: 925, risk: 250, temin: 0, mali: 0, cetvel: "I sayılı cetvel (D) sıra 2/a, okul müdürü" };
+    const ek = puanAl("eoh", d);
+    const oht = mudurOht(d, !!m.yrd);
+    return {
+      m, sinif: "Eğitim ve Öğretim Hizmetleri Sınıfı — müdür kadrosu", ek,
+      metin: "Ek gösterge öğretmen skalasıdır. 1. derecede II sayılı cetveldeki okul müdürü de 3.600 yazar. Eğitim öğretim tazminatı, öğretmen unvanında fiilen öğretmenlik yapana yazılır; müdür kadrosunda seçilmez.",
+      yan, oht, eot: null
+    };
+  }
+  if (m.tip === "sube" || m.tip === "ilyrd") {
+    const ek = ekYonetici(d, p.koken);
+    const oht = m.tip === "ilyrd" && d === 1
+      ? (p.il === "uc"
+        ? { oran: 155, yazi: "II sayılı cetvel (A) grup 8, bakanlık il müdür yardımcısı, Ankara / İstanbul / İzmir, 1. derece" }
+        : { oran: 135, yazi: "II sayılı cetvel (A) grup 10, diğer illerin il müdür yardımcısı, 1. derece" })
+      : mudurOht(d);
+    const yan = m.merkez
+      ? { isg: 650, risk: 0, temin: 650, mali: 0, cetvel: "(H) Millî Eğitim Bakanlığı 2. sıra, merkez teşkilat şube müdürü" }
+      : m.tip === "ilyrd"
+        ? { isg: 600, risk: 0, temin: 600, mali: 0, cetvel: "I sayılı cetvel (A) sıra 24/b, il müdürü yardımcısı" }
+        : (d <= 4
+          ? { isg: 600, risk: 0, temin: 500, mali: 0, cetvel: "I sayılı cetvel (A) sıra 25/a, şube müdürü, kadro derecesi 1–4" }
+          : { isg: 550, risk: 0, temin: 400, mali: 0, cetvel: "I sayılı cetvel (A) sıra 25/b, diğer dereceler" });
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı", ek,
+      metin: (ek.metin || "I sayılı cetvel (ı): 1. derece 3.600, 2. derece 3.000, 3. derece 2.200, 4. derece 2.100.") + " 10 Temmuz 2026 ek oranı, yalnız öğretmen kökenli il müdür yardımcısı, ilçe millî eğitim müdürü ve şube müdürüne yazılır.",
+      yan, oht, eot: null, ekOranYonetici: true
+    };
+  }
+  if (m.tip === "ilmem") {
+    let ek;
+    if (d === 1 && p.il === "uc") ek = { g: null, puan: 4200, metin: "II sayılı cetvel, bakanlık il müdürü, Ankara / İstanbul / İzmir, 1. derece: 4.200." };
+    else if (d === 1) ek = { g: findGroup("eoh"), puan: 3600, metin: "II sayılı cetvel, diğer illerin bakanlık il müdürü, 1. derece: 3.600." };
+    else ek = ekYonetici(d, p.koken);
+    const oht = d === 1
+      ? { oran: 210, yazi: "II sayılı cetvel (A) grup 5 sıra 12, il millî eğitim müdürü, 1. derece" }
+      : { oran: null, yazi: "İl millî eğitim müdürü özel hizmet satırı 1. dereceye bağlıdır. Alt derecede ayrı satır yok, oran uydurulmadı" };
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı", ek,
+      metin: ek.metin || "",
+      yan: { isg: 700, risk: 0, temin: 700, mali: 0, cetvel: "I sayılı cetvel (A) sıra 24/a, il müdürü" },
+      oht, eot: null
+    };
+  }
+  if (m.tip === "uzmanlik") {
+    const ek = puanAl("gih-i-yuksek", d);
+    let oht;
+    if (d === 1) oht = { oran: 100, yazi: "II sayılı cetvel (A) grup 12, eğitim uzmanı / Talim ve Terbiye Kurulu uzmanı, 1. derece" };
+    else if (d === 2 || d === 3) oht = { oran: 80, yazi: "II sayılı cetvel (A) grup 13, aynı unvan, 2 ve 3. derece" };
+    else oht = { oran: null, yazi: "Eğitim uzmanı satırı cetvelde 1, 2 ve 3. dereceye yazılmış. Bu derecede oran uydurulmadı" };
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı", ek,
+      metin: "Kadrosu kariyer uzmanlığı (müfettiş / özel yarışma) ise ek gösterge (g) bendi seçilir: 1. derece 4.200. Düz eğitim uzmanı kadrosu (i) bendidir.",
+      yan: { isg: 650, risk: 0, temin: 650, mali: 0, cetvel: m.ttk ? "(H) Millî Eğitim 1/c, Talim ve Terbiye Kurulu uzmanı" : "(H) Millî Eğitim 2. sıra, merkez eğitim uzmanı / APK uzmanı" },
+      oht, eot: null
+    };
+  }
+  if (m.tip === "ttk") {
+    if (m.rol === "baskan") {
+      return {
+        m, sinif: "Genel İdare Hizmetleri Sınıfı", ek: puanAl("gih-c", d),
+        metin: "I sayılı cetvel (c), Talim ve Terbiye Kurulu Başkanı, 1. derece 7.600.",
+        yan: { isg: 1450, risk: 0, temin: 1700, mali: 0, cetvel: "(H) Millî Eğitim 1/a" },
+        oht: d === 1 ? { oran: 335, yazi: "II sayılı cetvel (A) grup 3, Talim ve Terbiye Kurulu Başkanı" } : { oran: null, yazi: "Bu satır 1. derecededir" },
+        eot: null
+      };
+    }
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı", ek: puanAl("gih-f", d),
+      metin: "I sayılı cetvel (f), Talim ve Terbiye Kurulu üyesi, 1. derece 5.400.",
+      yan: { isg: 975, risk: 0, temin: 975, mali: 0, cetvel: "(H) Millî Eğitim 1/b" },
+      oht: d === 1 ? { oran: 330, yazi: "II sayılı cetvel (A) grup 4, Talim ve Terbiye Kurulu üyesi" } : { oran: null, yazi: "Bu satır 1. derecededir" },
+      eot: null
+    };
+  }
+  if (m.tip === "mufettis") {
+    const ek = puanAl("gih-g", d);
+    const turkiye = p.teftis === "turkiye";
+    const temin = m.yrd ? (turkiye ? 800 : 600) : (d <= 4 ? (turkiye ? 1800 : 1350) : (turkiye ? 1500 : 1050));
+    const oht = m.yrd
+      ? { oran: 92, yazi: "II sayılı cetvel (B) sıra 4/b, ilköğretim müfettiş yardımcısı. Cetveldeki ad budur; bugünkü unvan eğitim müfettiş yardımcısıdır" }
+      : { oran: d <= 2 ? 130 : 125, yazi: "II sayılı cetvel (B) sıra 4/a, ilköğretim müfettişi satırı. " + (d <= 2 ? "1–2. derece %130" : "diğer dereceler %125") };
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı — kariyer", ek,
+      metin: "Ek gösterge I sayılı cetvel (g), kariyer uzman ve müfettiş skalası. 1. derece 4.200, 3. derece 2.800.",
+      yan: { isg: Math.round(temin * 0.5), risk: 0, temin, mali: 0, cetvel: "I sayılı cetvel (A) dipnot 2. Temininde güçlük " + (turkiye ? "Türkiye geneli" : "il düzeyi") + ". İş güçlüğü, bu puanın yüzde 50’sidir" },
+      oht, eot: null
+    };
+  }
+  if (m.tip === "muhendis") {
+    const uzun = p.hizmet >= 5;
+    return {
+      m, sinif: "Teknik Hizmetler Sınıfı", ek: puanAl("th-a", d),
+      metin: "En az dört yıllık mühendislik ve mimarlık, I sayılı cetvel II/a. 1. derece 4.200, 3. derece 2.800.",
+      yan: uzun
+        ? { isg: 800, risk: 0, temin: 1400, mali: 0, cetvel: "I sayılı cetvel (B) sıra 2/b, kendi dalında 5 yıl ve daha fazla" }
+        : { isg: 800, risk: 0, temin: 975, mali: 0, cetvel: "I sayılı cetvel (B) sıra 2/a, 5 yıldan az" },
+      oht: { oran: d <= 4 ? 160 : 152, ek: [5, 15, 17, 19, 23, 28, 35], yazi: "II sayılı cetvel (E) sıra 1/b" },
+      eot: null
+    };
+  }
+  if (m.tip === "tekniker") {
+    const uzun = p.hizmet >= 5;
+    return {
+      m, sinif: "Teknik Hizmetler Sınıfı", ek: puanAl("th-c", d),
+      metin: "Yüksek tekniker ve tekniker, I sayılı cetvel II/c. 1. derece 2.800, 4. derece 1.700.",
+      yan: { isg: 650, risk: 0, temin: uzun ? 1400 : 975, mali: 0, cetvel: "I sayılı cetvel (B) sıra 5, " + (uzun ? "5 yıl ve daha fazla" : "5 yıldan az") },
+      oht: { oran: d <= 4 ? 100 : 93, ek: [4, 11, 12, 13, 15, 17, 20], yazi: "II sayılı cetvel (E) sıra 2" },
+      eot: null
+    };
+  }
+  if (m.tip === "teknisyen") {
+    const uzun = p.hizmet >= 5;
+    return {
+      m, sinif: "Teknik Hizmetler Sınıfı", ek: puanAl("th-d", d),
+      metin: "Lise dengi teknisyen, I sayılı cetvel II/d. 1. derece 2.100, 3. derece 1.400.",
+      yan: { isg: 525, risk: 0, temin: uzun ? 525 : 425, mali: 0, cetvel: "I sayılı cetvel (B) sıra 7, lise dengi mesleki, kendi ihtisas dalı, " + (uzun ? "5 yıl ve daha fazla" : "5 yıldan az") },
+      oht: { oran: d <= 5 ? 64 : 61, ek: [3, 8, 9, 10, 11, 13, 15], yazi: "II sayılı cetvel (E) sıra 4" },
+      eot: null
+    };
+  }
+  if (m.tip === "sef" || m.tip === "memur" || m.tip === "veri") {
+    const grupId = p.egitim === "lise" ? "gih-i-diger" : "gih-i-yuksek";
+    const ek = puanAl(grupId, d);
+    const metin = "I sayılı cetvel (i). Kariyer, şube müdürü veya müfettiş değilse bu benttir. Yükseköğrenimde 1. derece 2.800’dür, 3.600 değildir.";
+    if (m.tip === "sef") {
+      return {
+        m, sinif: "Genel İdare Hizmetleri Sınıfı", ek, metin,
+        yan: { isg: 500, risk: 0, temin: 200, mali: 0, cetvel: "I sayılı cetvel (A) sıra 27/b, şef" },
+        oht: d <= 4 ? { oran: 60, yazi: "II sayılı cetvel (A) grup 16, amir ve şef, 1–4. derece" } : { oran: null, yazi: "Şef satırı 1–4. dereceye yazılmış" },
+        eot: null
+      };
+    }
+    if (m.tip === "veri") {
+      return {
+        m, sinif: "Genel İdare Hizmetleri Sınıfı", ek, metin,
+        yan: { isg: 750, risk: 0, temin: 250, mali: 0, cetvel: m.bilgi ? "I sayılı cetvel (A) sıra 16/e, bilgisayar işletmeni" : "I sayılı cetvel (A) sıra 17, veri hazırlama ve kontrol işletmeni" },
+        oht: d <= 4 ? { oran: 55, yazi: "II sayılı cetvel (A) grup 17. 1–16. gruplara girmeyen genel idare, 1–4. derece" } : { oran: null, yazi: "Grup 17 yalnız 1–4. derecedir" },
+        eot: null,
+        dipnot: "Dipnottaki ek temininde güçlük ve iş riski kendiliğinden yazılmaz. Görev fiilen o iş ise kurum ayrıca puan verebilir."
+      };
+    }
+    return {
+      m, sinif: "Genel İdare Hizmetleri Sınıfı", ek, metin,
+      yan: { isg: 500, risk: 0, temin: 0, mali: 0, taban: 1, cetvel: "Madde 4/b. Unvan cetvelde ayrıca sayılmasa da iş güçlüğü 500 puandan az olamaz. Risk, temin ve mali için bu kararda memur satırı yok" },
+      oht: d <= 4 ? { oran: 55, yazi: "II sayılı cetvel (A) grup 17, 1–4. derece" } : { oran: null, yazi: "Grup 17 yalnız 1–4. derecedir" },
+      eot: null
+    };
+  }
+  if (m.tip === "avukat") {
+    return {
+      m, sinif: "Avukatlık Hizmetleri Sınıfı", ek: puanAl("av", d),
+      metin: "I sayılı cetvel V, avukat skalası. 1. derece 3.600, 3. derece 2.200.",
+      yan: { isg: 800, risk: 750, temin: 0, mali: 0, cetvel: "I sayılı cetvel (A) sıra 10, avukat" },
+      oht: { oran: d <= 4 ? 135 : 130, yazi: "II sayılı cetvel (C), avukatlık hizmetleri" },
+      eot: null
+    };
+  }
+  const ek = puanAl("yh", d);
+  let yan;
+  if (m.bekci) yan = { isg: 500, risk: 175, temin: 0, mali: 0, cetvel: "I sayılı cetvel (E) sıra 3, bekçi" };
+  else if (m.tekyrd) yan = { isg: 500, risk: 0, temin: 375, mali: 0, cetvel: "I sayılı cetvel (E) sıra 2, teknisyen yardımcısı" };
+  else yan = { isg: 500, risk: 0, temin: 0, mali: 0, cetvel: "I sayılı cetvel (E) sıra 6, yardımcı hizmetler, diğerleri. Okul hizmetlisi, aşçı, kaloriferci ve yardımcı hizmetler şoförü bu satırdır" };
+  return {
+    m, sinif: "Yardımcı Hizmetler Sınıfı", ek,
+    metin: "Ek gösterge yalnız 1, 2, 3 ve 4. derecede 600’dür. 5. dereceden itibaren cetvelde ek gösterge yoktur, sıfır yazılır.",
+    yan,
+    oht: { oran: null, yazi: "Yardımcı hizmetler için kararda bu unvana özel bir oran satırı yok. Oran uydurulmadı" },
+    eot: null
+  };
+}
+
+function fisSatirlari(p, c) {
+  const g = gostergePuan(p.derece, p.kademe);
+  const ekAd = c.ek.g ? c.ek.g.kalem : "II sayılı cetvel";
+  const rows = [
+    ["Hizmet sınıfı", "657 md. 36", c.sinif, "Kadro sınıfı. Ek gösterge bendi buna göre seçilir."],
+    ["Aylık gösterge", "657 md. 43/A gösterge tablosu", sayi.format(g), p.derece + ". derecenin " + p.kademe + ". kademesi. Kademe yalnız bu rakamı değiştirir."],
+    ["Ek gösterge", c.ek.g ? c.ek.g.sinif : "II sayılı ek gösterge cetveli", c.ek.puan ? sayi.format(c.ek.puan) : "0", ekAd + ". " + (c.metin || "")],
+    ["Emekli keseneği dilimi", "5434 ek 70, ek gösterge grubu", "%" + emekliDilim(c.ek.puan), "Mutemet maaşa ayrıca yazmaz. Ek gösterge " + sayi.format(c.ek.puan || 0) + " olduğu için dilim budur. 2.800’de %85, 3.600’da %145 olur."]
+  ];
+  if (c.yan.bos) {
+    rows.push(["İş güçlüğü", "Zam cetveli", "kurum cetveli", c.yan.cetvel]);
+    rows.push(["İş riski", "Zam cetveli", "kurum cetveli", "Aynı satır."]);
+    rows.push(["Temininde güçlük", "Zam cetveli", "kurum cetveli", "Aynı satır."]);
+    rows.push(["Mali sorumluluk", "Zam cetveli", "kurum cetveli", "Aynı satır."]);
+  } else {
+    rows.push(["İş güçlüğü", "Zam ve tazminat kararı, I sayılı cetvel", sayi.format(c.yan.isg), c.yan.cetvel]);
+    const ayni = c.yan.taban ? "Bu kararda memur satırı yok, sıfır yazılır." : "Dört puan aynı satırdan ayrılır.";
+    rows.push(["İş riski", "Aynı cetvel", sayi.format(c.yan.risk), ayni]);
+    rows.push(["Temininde güçlük", "Aynı cetvel", sayi.format(c.yan.temin), ayni]);
+    rows.push(["Mali sorumluluk", "Aynı cetvel", sayi.format(c.yan.mali), c.yan.taban ? ayni : "Bu unvanda mali sorumluluk puanı yoksa sıfır yazılır."]);
+  }
+  if (p.belletici && (c.m.tip === "ogretmen" || c.m.tip === "atolye")) {
+    rows.push(["Belleticilik eki", "I sayılı cetvel (D) not 3", "+100", "İş güçlüğü puanının üstüne ayrıca yazılır. Üst satırdaki puana katılmaz."]);
+  }
+  if (c.oht && c.oht.oran != null) {
+    rows.push(["Özel hizmet tazminatı", "II sayılı cetvel", "%" + c.oht.oran, c.oht.yazi]);
+  } else {
+    rows.push(["Özel hizmet tazminatı", "II sayılı cetvel", "seçilmez", (c.oht && c.oht.yazi) || "Bu kadroda özel hizmet satırı yok"]);
+  }
+  if (c.ekOranYonetici) {
+    let ek = "seçilmez";
+    let neden = "10 Temmuz 2026 tarihli 11516 sayılı Cumhurbaşkanı kararı. Öğretmen kökenli değilse ek oran yok.";
+    if (p.koken && p.hizmet >= 20) { ek = "+%50"; neden = "Öğretmen kadrosu ve bu yöneticilik toplamı en az 20 yıl. Ek oran, yukarıdaki oranın üstüne yazılır."; }
+    else if (p.koken && p.hizmet >= 10) { ek = "+%25"; neden = "Aynı toplam en az 10 yıl, 20 yıldan az. Ek oran üstüne yazılır."; }
+    else if (p.koken) neden = "Öğretmen kökenli fakat toplam süre 10 yılın altında. Ek oran henüz yok.";
+    rows.push(["Öğretmen kökenli yönetici eki", "II sayılı cetvel (A) son not, 10.7.2026", ek, neden]);
+  }
+  if (c.eot) {
+    rows.push(["Eğitim öğretim tazminatı", "III sayılı cetvel A/I-a", "%" + c.eot.baz, c.eot.bazYazi]);
+    if (c.eot.ek) rows.push(["Uzman / başöğretmen eki", "III sayılı cetvel A/I-b, c", "+%" + c.eot.ek, c.eot.ekYazi]);
+    const ilave = ILAVE[p.brans];
+    if (ilave) {
+      const oran = p.sure === "2" ? ilave[1] : ilave[0];
+      rows.push(["İlave eğitim öğretim tazminatı", "III sayılı cetvel A/II", "%" + oran, ilave[2] + ". " + (p.sure === "2" ? "Öğrenim en az 2 yıl." : "Öğrenim en az 4 yıl.") + " Fiilen derse girmeyene ve mesleki açık öğretime yazılmaz."]);
+    } else if (c.m.tip === "ogretmen" || c.m.tip === "atolye") {
+      rows.push(["İlave eğitim öğretim tazminatı", "III sayılı cetvel A/II", "seçilmez", "Meslek alanı seçilmediyse boş kalır. Okul V sayılı cetvelde yoksa veya fiilen derse girilmiyorsa da yazılmaz."]);
+    }
+  } else rows.push(["Eğitim öğretim tazminatı", "III sayılı cetvel", "seçilmez", c.m.tip === "mudur" ? "Müdür kadrosunda seçilmez. Öğretmen kadrosunda kalıp müdür veya yardımcısı olarak görevlendirilen kişiye madde 4/f uyarınca eğitim öğretim tazminatı yazılır; o kişi öğretmen fişindedir." : "Bu kadro öğretmen unvanında fiilen öğretmenlik satırı değildir."]);
+  if (c.oht && c.oht.ek) {
+    const bolge = Number(p.bolge);
+    if (bolge >= 1 && bolge <= 7) rows.push(["Bölge ek tazminatı", "Aynı tazminat satırının bölge sütunu", "%" + c.oht.ek[bolge - 1], bolge + ". bölge. Asıl oranın üstüne eklenir. Cetvel dışı ilde seçilmez."]);
+    else rows.push(["Bölge ek tazminatı", "IV sayılı cetveldeki yöreler", "seçilmez", "Görev yeri kalkınmada öncelikli yöre cetvelinde değilse bu sütun boş kalır."]);
+  }
+  if (c.dipnot) rows.push(["Dipnot", "Aynı yan ödeme satırı", "kendiliğinden yazılmaz", c.dipnot]);
+  return rows;
+}
+
+function ciz() {
+  const p = oku();
+  const g = gostergePuan(p.derece, p.kademe);
+  const hedef = $("sonuc");
+  if (!g) {
+    hedef.innerHTML = '<div class="warn">Bu derece-kademe gösterge tablosunda yok. 1. derece 4, 2. derece 6, 3. derece 8 kademeye kadar gider. 4. dereceden itibaren 9 kademe vardır.</div>';
+    return;
+  }
+  const c = coz(p);
+  const rows = fisSatirlari(p, c);
+  const olcek = (c.ek.g ? Object.keys(c.ek.g.puan) : []).map((derece) => {
+    const n = Number(derece);
+    return "<tr class=\"" + (n === p.derece ? "here" : "") + "\"><td>" + derece + ". derece</td><td class=\"num\">" + sayi.format(c.ek.g.puan[derece]) + "</td><td>%" + emekliDilim(c.ek.g.puan[derece]) + "</td></tr>";
+  }).join("");
+  hedef.innerHTML =
+    '<div class="stamp"><div><div class="kicker">' + c.m.grup + "</div><h2 style=\"margin:4px 0 0\">" + c.m.ad + "</h2><div class=\"mini\">" + p.derece + ". derece / " + p.kademe + ". kademe · aylık gösterge " + sayi.format(g) + "</div></div>" +
+    '<div class="ek"><small>seçilen ek gösterge</small>' + sayi.format(c.ek.puan || 0) + "</div></div>" +
+    '<div class="why"><strong>Ek gösterge kalemi.</strong> ' + (c.metin || "") + "</div>" +
+    (olcek ? '<table class="scale"><thead><tr><th>Aynı kalem, diğer dereceler</th><th class="num">Ek gösterge</th><th>Emekli dilimi</th></tr></thead><tbody>' + olcek + "</tbody></table>" : "") +
+    '<div class="banner"><h2>Mutemedin cetvelden seçeceği kalemler</h2><div>Her satır bir giriş. Tutar yok. Lira karşılığı katsayıyla değişir ve maaşın tamamı bu puanlar değildir.</div></div>' +
+    '<table class="fis"><thead><tr><th>Kalem</th><th>Cetvel</th><th>Yazılacak</th><th>Neden bu satır</th></tr></thead><tbody>' +
+    rows.map((r) => '<tr class="' + (r[2] === "seçilmez" ? "yok" : "") + '"><td>' + r[0] + '</td><td>' + r[1] + '</td><td class="deger">' + r[2] + "</td><td>" + r[3] + "</td></tr>").join("") +
+    "</tbody></table>";
+}
+
+function oku() {
+  return {
+    id: $("unvan").value,
+    egitim: $("egitim").value,
+    yer: $("yer").value,
+    il: $("il").value,
+    teftis: $("teftis").value,
+    bolge: $("bolge").value,
+    derece: Number($("derece").value),
+    kademe: Number($("kademe").value),
+    hizmet: Number($("hizmet").value) || 0,
+    koken: $("koken").checked,
+    belletici: $("belletici").checked,
+    brans: $("brans").value,
+    sure: $("sure").value
+  };
+}
+function mev() { return MEB.find((x) => x.id === $("unvan").value); }
+let sonEgitim = "";
+function alanlari() {
+  const m = mev();
+  $("egitimWrap").hidden = !m.egitim;
+  $("yerWrap").hidden = m.yer !== "saglik";
+  $("ilWrap").hidden = !m.il;
+  $("teftisWrap").hidden = !m.teftis;
+  $("bolgeWrap").hidden = !m.bolge;
+  $("hizmetWrap").hidden = !m.hizmet;
+  $("kokenWrap").hidden = !m.koken;
+  $("belleticiWrap").hidden = !(m.tip === "ogretmen" || m.tip === "atolye");
+  $("ilaveWrap").hidden = !(m.tip === "ogretmen" || m.tip === "atolye");
+  $("sureWrap").hidden = $("ilaveWrap").hidden || $("brans").value === "yok";
+  $("hizmetLabel").textContent = m.tip === "muhendis" || m.tip === "tekniker" || m.tip === "teknisyen"
+    ? "Kendi ihtisas dalındaki hizmet yılı"
+    : m.koken
+      ? "Öğretmen kadrosu ve bu yöneticilik toplam yılı"
+      : "Hizmet yılı";
+  if (m.egitim && m.egitim !== sonEgitim) {
+    sonEgitim = m.egitim;
+    $("egitim").innerHTML = EGITIM[m.egitim].map((x) => '<option value="' + x[0] + '">' + x[1] + "</option>").join("");
+  }
+  if (!m.egitim) sonEgitim = "";
+}
+function cetvelCiz(q) {
+  const sorgu = (q || "").toLocaleLowerCase("tr");
+  const html = CETVEL.map((s) => {
+    const gruplar = s.gruplar.filter((g) => (s.sinif + " " + g.kalem + " " + (g.kim || "")).toLocaleLowerCase("tr").includes(sorgu));
+    if (!gruplar.length) return "";
+    return '<section class="cetvel-block"><h3>' + s.sinif + "</h3>" + gruplar.map((g) => {
+      const puan = Object.keys(g.puan).map((d) => d + ". derece " + sayi.format(g.puan[d])).join(" · ");
+      return '<div class="card" style="margin-bottom:8px"><strong>' + g.kalem + '</strong><p class="mini">' + (g.kim || "") + "</p><div>" + puan + "</div></div>";
+    }).join("") + "</section>";
+  }).join("");
+  $("cetvel").innerHTML = html || '<p class="mini">Bu aramada satır yok.</p>';
+}
+function basla() {
+  let grup = "";
+  $("unvan").innerHTML = MEB.map((m) => {
+    const ac = m.grup !== grup ? (grup ? "</optgroup>" : "") + '<optgroup label="' + m.grup + '">' : "";
+    grup = m.grup;
+    return ac + '<option value="' + m.id + '">' + m.ad + "</option>";
+  }).join("") + "</optgroup>";
+  ["unvan", "egitim", "yer", "il", "teftis", "bolge", "derece", "kademe", "hizmet", "koken", "belletici", "brans", "sure"].forEach((id) => {
+    $(id).addEventListener("input", () => { if (id === "unvan" || id === "brans") alanlari(); ciz(); });
+    $(id).addEventListener("change", () => { if (id === "unvan" || id === "brans") alanlari(); ciz(); });
+  });
+  $("hesapla").addEventListener("click", () => { ciz(); $("sonuc").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  $("ara").addEventListener("input", () => cetvelCiz($("ara").value));
+  const hazir = [
+    ["Hemşire 3/2, lisans", "hemsire", { egitim: "lisans4", derece: 3, kademe: 2 }],
+    ["Hemşire 3/2, önlisans", "hemsire", { egitim: "onlisans", derece: 3, kademe: 2 }],
+    ["Hemşire 3/2, sağlık lisesi", "hemsire", { egitim: "lise", derece: 3, kademe: 2 }],
+    ["Öğretmen 3/2", "ogretmen", { derece: 3, kademe: 2 }],
+    ["Okul müdürü 1/4", "mudur", { derece: 1, kademe: 4 }],
+    ["Hizmetli 3/2", "hizmetli", { derece: 3, kademe: 2 }],
+    ["Şube müdürü 1/4", "sube", { derece: 1, kademe: 4, hizmet: 20, koken: true }]
+  ];
+  $("presets").innerHTML = hazir.map((h, i) => '<button type="button" class="chip" data-p="' + i + '">' + h[0] + "</button>").join("");
+  $("presets").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-p]");
+    if (!b) return;
+    const h = hazir[Number(b.dataset.p)];
+    $("unvan").value = h[1];
+    alanlari();
+    if (h[2].egitim) $("egitim").value = h[2].egitim;
+    $("derece").value = h[2].derece;
+    $("kademe").value = h[2].kademe;
+    if (h[2].hizmet != null) $("hizmet").value = h[2].hizmet;
+    $("koken").checked = !!h[2].koken;
+    ciz();
+  });
+  $("unvan").value = "hemsire";
+  alanlari();
+  $("egitim").value = "lisans4";
+  cetvelCiz("");
+  ciz();
+}
+basla();
+</script>
+</body>
+</html>
